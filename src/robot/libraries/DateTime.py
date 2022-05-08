@@ -569,7 +569,11 @@ class Date:
         return dt.strftime('%Y-%m-%d %H:%M:%S') + '.%03d' % ms
 
     def _convert_to_epoch(self, dt):
-        return time.mktime(dt.timetuple()) + dt.microsecond / 1e6
+        try:
+            return time.mktime(dt.utctimetuple()) + dt.microsecond / 1e6
+        except OverflowError:
+            now = datetime.now()
+            return time.mktime(now.utctimetuple()) + now.microsecond / 1e6 + (dt - now).total_seconds()
 
     def __add__(self, other):
         if isinstance(other, Time):
